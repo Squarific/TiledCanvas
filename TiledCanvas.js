@@ -81,14 +81,13 @@ TiledCanvas.prototype.createContext = function createContext () {
     var ctx = document.createElement('canvas').getContext('2d');
     for (var key in ctx) {
         if (typeof ctx[key] === 'function') {
-            context[key] = function () {
-                this.contextQueue.push([key].concat(arguments));
-            }.bind(this);
+            context[key] = function (func) {
+                this.contextQueue.push(arguments);
+            }.bind(this, key);
         } else if (typeof ctx[key] !== 'object') {
-            this.contextPropertys[key] = ctx[key];
-
             context.__defineGetter__(key, function () {
-                return this.contextPropertys[key];
+                var ctx = document.createElement('canvas').getContext('2d');
+                return this.contextPropertys[key] || ctx[key];
             }.bind(this));
 
             context.__defineSetter__(key, function (value) {
