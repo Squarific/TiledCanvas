@@ -7,7 +7,6 @@ function TiledCanvas (canvas, settings) {
     this.chunks = {};
     this.settings = this.normalizeDefaults(settings, this.defaulSettings);
     this.contextQueue = [];
-    this.contextPropertys = {};
     this.context = this.createContext();
 }
 
@@ -86,13 +85,12 @@ TiledCanvas.prototype.createContext = function createContext () {
             }.bind(this, key);
         } else if (typeof ctx[key] !== 'object') {
             context.__defineGetter__(key, function () {
-                var ctx = document.createElement('canvas').getContext('2d');
-                return this.contextPropertys[key] || ctx[key];
+                throw 'Getting the properties is not yet supported, if you want support contact tiledCanvas@squarific.com';
             }.bind(this));
 
-            context.__defineSetter__(key, function (value) {
-                return this.contextPropertys[key] = value;
-            }.bind(this));
+            context.__defineSetter__(key, function (key, value) {
+                this.contextQueue.push(arguments);
+            }.bind(this, key));
         }
     }
     return context;
