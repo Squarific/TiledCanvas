@@ -41,10 +41,11 @@ TiledCanvas.prototype.normalizeDefaults = function normalizeDefaults (target, de
 
 
 TiledCanvas.prototype.redraw = function redraw () {
+    this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
     var startChunkX = Math.floor(this.leftTopX / this.settings.chunkSize),
-        endChunkX =  Math.ceil(this.leftTopX + this.canvas.width / this.settings.chunkSize),
+        endChunkX =  Math.ceil((this.leftTopX + this.canvas.width) / this.settings.chunkSize),
         startChunkY = Math.floor(this.leftTopY / this.settings.chunkSize),
-        endChunkY = Math.ceil(this.leftTopY + this.canvas.height / this.settings.chunkSize);
+        endChunkY = Math.ceil((this.leftTopY + this.canvas.height) / this.settings.chunkSize);
     for (var chunkX = startChunkX; chunkX < endChunkX; chunkX++) {
         for (var chunkY = startChunkY; chunkY < endChunkY; chunkY++) {
             this.drawChunk(chunkX, chunkY);
@@ -54,7 +55,7 @@ TiledCanvas.prototype.redraw = function redraw () {
 
 TiledCanvas.prototype.drawChunk = function drawChunk (chunkX, chunkY) {
     if (this.chunks[chunkX] && this.chunks[chunkX][chunkY]) {
-        this.ctx.putImageData(this.chunks[chunkX][chunkY], this.leftTopX - chunkX * this.settings.chunkSize, this.leftTopY - chunkY * this.settings.chunkSize);
+        this.ctx.putImageData(this.chunks[chunkX][chunkY], chunkX * this.settings.chunkSize - this.leftTopX, chunkY * this.settings.chunkSize - this.leftTopY);
     }
 };
 
@@ -85,10 +86,10 @@ TiledCanvas.prototype.executeChunk = function executeChunk (chunkX, chunkY) {
     ctx.translate(-chunkX * this.settings.chunkSize, -chunkY * this.settings.chunkSize);
 
     for (var queuekey = 0; queuekey < this.contextQueue.length; queuekey++) {
-        if (typeof ctx[args[0]] === 'function') {
-            ctx[args[0]].apply(ctx, args.slice(1));
+        if (typeof ctx[this.contextQueue[queuekey][0]] === 'function') {
+            ctx[this.contextQueue[queuekey][0]].apply(ctx, Array.prototype.slice.call(this.contextQueue[queuekey], 1));
         } else {
-            ctx[args[0]] = args[1];
+            ctx[this.contextQueue[queuekey][0]] = this.contextQueue[queuekey][1];
         }
     }
 
