@@ -9,7 +9,10 @@
 		<canvas id='testCanvas'></canvas>
         <script src="TiledCanvas.js"></script>
         <script>
-            var tiledCanvas = new TiledCanvas(document.getElementById('testCanvas'));
+			var canvas = document.getElementById('testCanvas');
+			canvas.width = window.innerWidth;
+			canvas.height = window.innerHeight;
+            var tiledCanvas = new TiledCanvas();
         </script>
 	</body>
 </html>
