@@ -55,7 +55,7 @@ TiledCanvas.prototype.redraw = function redraw () {
 
 TiledCanvas.prototype.drawChunk = function drawChunk (chunkX, chunkY) {
     if (this.chunks[chunkX] && this.chunks[chunkX][chunkY]) {
-        this.ctx.putImageData(this.chunks[chunkX][chunkY], chunkX * this.settings.chunkSize - this.leftTopX, chunkY * this.settings.chunkSize - this.leftTopY);
+        this.ctx.drawImage(this.chunks[chunkX][chunkY].canvas, chunkX * this.settings.chunkSize - this.leftTopX, chunkY * this.settings.chunkSize - this.leftTopY);
     }
 };
 
@@ -80,12 +80,10 @@ TiledCanvas.prototype.executeNoRedraw = function executeNoRedraw () {
 };
 
 TiledCanvas.prototype.executeChunk = function executeChunk (chunkX, chunkY) {
-    var ctx = this.newCtx(this.settings.chunkSize, this.settings.chunkSize);
-
     this.chunks[chunkX] = this.chunks[chunkX] || [];
-    if (this.chunks[chunkX][chunkY]) {
-        ctx.putImageData(this.chunks[chunkX][chunkY], 0, 0);
-    }
+
+    this.chunks[chunkX][chunkY] = this.chunks[chunkX][chunkY] || this.newCtx(this.settings.chunkSize, this.settings.chunkSize);
+    var ctx = this.chunks[chunkX][chunkY];
 
     ctx.translate(-chunkX * this.settings.chunkSize, -chunkY * this.settings.chunkSize);
 
@@ -96,11 +94,6 @@ TiledCanvas.prototype.executeChunk = function executeChunk (chunkX, chunkY) {
             ctx[this.contextQueue[queuekey][0]] = this.contextQueue[queuekey][1];
         }
     }
-
-    var imagedata = ctx.getImageData(0, 0, this.settings.chunkSize, this.settings.chunkSize);
-    if (!this.isChunkEmpty(imagedata)) {
-        this.chunks[chunkX][chunkY] = imagedata;
-    }
 };
 
 TiledCanvas.prototype.cleanup = function cleanup (chunkX, chunkY, arguments) {
@@ -108,15 +101,6 @@ TiledCanvas.prototype.cleanup = function cleanup (chunkX, chunkY, arguments) {
         return this.cleanupFunctions[arguments[0]](arguments.slice(), chunkX * this.settings.chunkSize, chunkY * this.settings.chunkSize);
     }
     return arguments;
-};
-
-TiledCanvas.prototype.isChunkEmpty = function isChunkEmpty (imageData) {
-    for (var k = 3; k < imageData.data.length; k += 4) {
-        if (imageData.data[k] !== 0) {
-            return false;
-        }
-    }
-    return true;
 };
 
 TiledCanvas.prototype.drawingRegion = function (startX, startY, endX, endY, border) {
