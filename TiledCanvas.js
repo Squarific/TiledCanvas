@@ -94,6 +94,8 @@ TiledCanvas.prototype.executeChunk = function executeChunk (chunkX, chunkY) {
             ctx[this.contextQueue[queuekey][0]] = this.contextQueue[queuekey][1];
         }
     }
+
+    ctx.translate(chunkX * this.settings.chunkSize, chunkY * this.settings.chunkSize);
 };
 
 TiledCanvas.prototype.cleanup = function cleanup (chunkX, chunkY, arguments) {
