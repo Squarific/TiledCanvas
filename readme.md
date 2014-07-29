@@ -49,7 +49,7 @@ For example
 Then you have to inform the tiledCanvas where you drew.
 This has to take into account the width of things, for example if you draw a
 horizontal 5 pixel line then the region you drew in is also 5 pixel high.
-You do this using the `tiledCanvas.drawRegion(startX, startY, endX, endY)` method.
+You do this using the `tiledCanvas.drawRegion(startX, startY, endX, endY [, border])` method.
 
 Then you need to tell tiledCanvas to do the actual drawing. This can be done
 using the tiledCanvas.execute() method.
@@ -63,6 +63,11 @@ Our example:
     tiledCanvas.context.stroke();
     tiledCanvas.drawRegion(0, 0, 20, 20);
     tiledCanvas.execute();
+
+We could have also written
+
+    tiledCanvas.drawRegion(5, 5, 15, 15, 5);
+
 
 ### Note on properties
 
