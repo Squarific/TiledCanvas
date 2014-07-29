@@ -68,6 +68,10 @@ We could have also written
 
     tiledCanvas.drawRegion(5, 5, 15, 15, 5);
 
+If you want to add a lot of stuff and don't want to redraw every time between
+executes you can use the `tiledCanvas.executeNoRedraw()` method and then
+manually call the `tiledCanvas.redraw()` method.
+
 
 ### Note on properties
 

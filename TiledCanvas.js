@@ -66,13 +66,17 @@ TiledCanvas.prototype.goto = function goto (x, y) {
 };
 
 TiledCanvas.prototype.execute = function execute () {
+    this.executeNoRedraw();
+    this.redraw();
+};
+
+TiledCanvas.prototype.executeNoRedraw = function executeNoRedraw () {
     for (var chunkX = this.affecting[0][0]; chunkX < this.affecting[1][0]; chunkX++) {
         for (var chunkY = this.affecting[0][1]; chunkY < this.affecting[1][1]; chunkY++) {
             this.executeChunk(chunkX, chunkY);
         }
     }
     this.contextQueue = [];
-    this.redraw();
 };
 
 TiledCanvas.prototype.executeChunk = function executeChunk (chunkX, chunkY) {
