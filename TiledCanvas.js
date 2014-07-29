@@ -124,7 +124,7 @@ TiledCanvas.prototype.drawingRegion = function (startX, startY, endX, endY, bord
     this.affecting[0][0] = Math.floor((Math.min(startX, endX) - border) / this.settings.chunkSize);
     this.affecting[0][1] = Math.floor((Math.min(startY, endY) - border) / this.settings.chunkSize);
     this.affecting[1][0] = Math.ceil((Math.max(endX, startX) + border) / this.settings.chunkSize);
-    this.affecting[1][1] = Math.ceil((Math.max(endY, startY + border) / this.settings.chunkSize));
+    this.affecting[1][1] = Math.ceil((Math.max(endY, startY) + border) / this.settings.chunkSize);
 };
 
 TiledCanvas.prototype.newCtx = function newCtx (width, height) {
