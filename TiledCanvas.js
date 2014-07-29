@@ -5,7 +5,7 @@ function TiledCanvas (canvas, settings) {
     this.leftTopY = 0;
     this.affecting = [[0, 0], [0, 0]];
     this.chunks = {};
-    this.settings = this.normalizeDefaults(settings, this.defaulSettings);
+    this.settings = this.normalizeDefaults(settings, this.defaultSettings);
     this.contextQueue = [];
     this.context = this.createContext();
 }
@@ -41,31 +41,81 @@ TiledCanvas.prototype.normalizeDefaults = function normalizeDefaults (target, de
 
 
 TiledCanvas.prototype.redraw = function redraw () {
-    if (this.zoom <= 0) this.zoom = 1;
+    var startChunkX = Math.floor(this.leftTopX / this.settings.chunkSize),
+        endChunkX =  Math.ceil(this.leftTopX + this.canvas.width / this.settings.chunkSize),
+        startChunkY = Math.floor(this.leftTopY / this.settings.chunkSize),
+        endChunkY = Math.ceil(this.leftTopY + this.canvas.height / this.settings.chunkSize);
+    for (var chunkX = startChunkX; chunkX < endChunkX; chunkX++) {
+        for (var chunkY = startChunkY; chunkY < endChunkY; chunkY++) {
+            this.drawChunk(chunkX, chunkY);
+        }
+    }
+};
 
-
+TiledCanvas.prototype.drawChunk = function drawChunk (chunkX, chunkY) {
+    if (this.chunks[chunkX] && this.chunks[chunkX][chunkY]) {
+        this.ctx.putImageData(this.chunks[chunkX][chunkY], this.leftTopX - chunkX * this.settings.chunkSize, this.leftTopY - chunkY * this.settings.chunkSize);
+    }
 };
 
 TiledCanvas.prototype.goto = function goto (x, y) {
-    this.leftTopX = 0;
-    this.leftTopY = 0;
-    this.zoom = 1;
-};
-
-TiledCanvas.prototype.zoom = function zoom (zoom) {
-    this.zoom = zoom;
+    this.leftTopX = x;
+    this.leftTopY = y;
     this.redraw();
 };
 
 TiledCanvas.prototype.execute = function execute () {
+    for (var chunkX = this.affecting[0][0]; chunkX < this.affecting[1][0]; chunkX++) {
+        for (var chunkY = this.affecting[0][1]; chunkY < this.affecting[1][1]; chunkY++) {
+            this.executeChunk(chunkX, chunkY);
+        }
+    }
+    this.contextQueue = [];
+    this.redraw();
+};
 
+TiledCanvas.prototype.executeChunk = function executeChunk (chunkX, chunkY) {
+    var ctx = this.newCtx(this.settings.chunkSize, this.settings.chunkSize);
+
+    this.chunks[chunkX] = this.chunks[chunkX] || [];
+    if (this.chunks[chunkX][chunkY]) {
+        ctx.putImageData(this.chunks[chunkX][chunkY], 0, 0);
+    }
+
+    ctx.translate(-chunkX * this.settings.chunkSize, -chunkY * this.settings.chunkSize);
+
+    for (var queuekey = 0; queuekey < this.contextQueue.length; queuekey++) {
+        if (typeof ctx[args[0]] === 'function') {
+            ctx[args[0]].apply(ctx, args.slice(1));
+        } else {
+            ctx[args[0]] = args[1];
+        }
+    }
+
+    this.chunks[chunkX][chunkY] = ctx.getImageData(0, 0, this.settings.chunkSize, this.settings.chunkSize);
+};
+
+TiledCanvas.prototype.cleanup = function cleanup (chunkX, chunkY, arguments) {
+    if (typeof this.cleanupFunctions[arguments[0]] === 'function') {
+        return this.cleanupFunctions[arguments[0]](arguments.slice(), chunkX * this.settings.chunkSize, chunkY * this.settings.chunkSize);
+    }
+    return arguments;
+};
+
+TiledCanvas.prototype.isChunkEmpty = function isChunkEmpty (imageData) {
+    for (var k = 3; k < imageData.data.length; k += 4) {
+        if (imageData.data[k] !== 0) {
+            return false;
+        }
+    }
+    return true;
 };
 
 TiledCanvas.prototype.drawingRegion = function (startX, startY, endX, endY) {
-    this.affecting[0][0] = startX;
-    this.affecting[0][1] = startY;
-    this.affecting[1][0] = endX;
-    this.affecting[1][1] = endY;
+    this.affecting[0][0] = Math.floor(Math.min(startX, endX) / this.settings.chunkSize);
+    this.affecting[0][1] = Math.floor(Math.min(startY, endY) / this.settings.chunkSize);
+    this.affecting[1][0] = Math.ceil(Math.max(endX, startX) / this.settings.chunkSize);
+    this.affecting[1][1] = Math.ceil(Math.max(endY, startY / this.settings.chunkSize));
 };
 
 TiledCanvas.prototype.newCtx = function newCtx (width, height) {
@@ -84,9 +134,17 @@ TiledCanvas.prototype.createContext = function createContext () {
                 this.contextQueue.push(arguments);
             }.bind(this, key);
         } else if (typeof ctx[key] !== 'object') {
-            context.__defineGetter__(key, function () {
-                throw 'Getting the properties is not yet supported, if you want support contact tiledCanvas@squarific.com';
-            }.bind(this));
+            context.__defineGetter__(key, function (key) {
+                var ctx = this.newCtx();
+                for (var queuekey = 0; queuekey < this.contextQueue.length; queuekey++) {
+                    if (typeof ctx[args[0]] === 'function') {
+                        ctx[args[0]].apply(ctx, args.slice(1));
+                    } else {
+                        ctx[args[0]] = args[1];
+                    }
+                }
+                return ctx[key];
+            }.bind(this, key));
 
             context.__defineSetter__(key, function (key, value) {
                 this.contextQueue.push(arguments);
