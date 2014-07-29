@@ -93,7 +93,10 @@ TiledCanvas.prototype.executeChunk = function executeChunk (chunkX, chunkY) {
         }
     }
 
-    this.chunks[chunkX][chunkY] = ctx.getImageData(0, 0, this.settings.chunkSize, this.settings.chunkSize);
+    var imagedata = ctx.getImageData(0, 0, this.settings.chunkSize, this.settings.chunkSize);
+    if (!this.isChunkEmpty(imagedata)) {
+        this.chunks[chunkX][chunkY] = imagedata;
+    }
 };
 
 TiledCanvas.prototype.cleanup = function cleanup (chunkX, chunkY, arguments) {
