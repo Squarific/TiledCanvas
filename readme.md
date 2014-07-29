@@ -64,6 +64,11 @@ Our example:
     tiledCanvas.drawRegion(0, 0, 20, 20);
     tiledCanvas.execute();
 
+### Note on properties
+
+After an execute the queue is emptied, that also means that all properties are
+reset to the default value!
+
 ### Getting properties
 
 If you get a property from the canvas it needs to run trough the whole queue on
