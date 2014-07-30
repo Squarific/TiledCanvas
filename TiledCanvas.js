@@ -89,13 +89,17 @@ TiledCanvas.prototype.executeChunk = function executeChunk (chunkX, chunkY) {
 
     for (var queuekey = 0; queuekey < this.contextQueue.length; queuekey++) {
         if (typeof ctx[this.contextQueue[queuekey][0]] === 'function') {
-            ctx[this.contextQueue[queuekey][0]].apply(ctx, Array.prototype.slice.call(this.contextQueue[queuekey], 1));
+            this.executeQueueOnChunk(ctx, this.contextQueue[queuekey]);
         } else {
             ctx[this.contextQueue[queuekey][0]] = this.contextQueue[queuekey][1];
         }
     }
 
     ctx.translate(chunkX * this.settings.chunkSize, chunkY * this.settings.chunkSize);
+};
+
+TiledCanvas.prototype.executeQueueOnChunk = function executeQueueOnChunk (ctx, args) {
+    ctx[args[0]].apply(ctx, Array.prototype.slice.call(args, 1));
 };
 
 TiledCanvas.prototype.cleanup = function cleanup (chunkX, chunkY, arguments) {
