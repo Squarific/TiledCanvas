@@ -82,10 +82,8 @@ TiledCanvas.prototype.executeNoRedraw = function executeNoRedraw () {
 TiledCanvas.prototype.executeChunk = function executeChunk (chunkX, chunkY) {
     this.chunks[chunkX] = this.chunks[chunkX] || [];
 
-    this.chunks[chunkX][chunkY] = this.chunks[chunkX][chunkY] || this.newCtx(this.settings.chunkSize, this.settings.chunkSize);
+    this.chunks[chunkX][chunkY] = this.chunks[chunkX][chunkY] || this.newCtx(this.settings.chunkSize, this.settings.chunkSize, -chunkX * this.settings.chunkSize, -chunkY * this.settings.chunkSize);
     var ctx = this.chunks[chunkX][chunkY];
-
-    ctx.translate(-chunkX * this.settings.chunkSize, -chunkY * this.settings.chunkSize);
 
     for (var queuekey = 0; queuekey < this.contextQueue.length; queuekey++) {
         if (typeof ctx[this.contextQueue[queuekey][0]] === 'function') {
@@ -94,8 +92,6 @@ TiledCanvas.prototype.executeChunk = function executeChunk (chunkX, chunkY) {
             ctx[this.contextQueue[queuekey][0]] = this.contextQueue[queuekey][1];
         }
     }
-
-    ctx.translate(chunkX * this.settings.chunkSize, chunkY * this.settings.chunkSize);
 };
 
 TiledCanvas.prototype.executeQueueOnChunk = function executeQueueOnChunk (ctx, args) {
@@ -117,10 +113,11 @@ TiledCanvas.prototype.drawingRegion = function (startX, startY, endX, endY, bord
     this.affecting[1][1] = Math.ceil((Math.max(endY, startY) + border) / this.settings.chunkSize);
 };
 
-TiledCanvas.prototype.newCtx = function newCtx (width, height) {
+TiledCanvas.prototype.newCtx = function newCtx (width, height, translateX, translateY) {
     var ctx = document.createElement('canvas').getContext('2d');
     ctx.canvas.width = width;
     ctx.canvas.height = height;
+    ctx.translate(translateX, translateY);
     return ctx;
 };
 
