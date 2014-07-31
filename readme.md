@@ -94,6 +94,8 @@ that can be an expensive operation. If you just want to clear the drawings but
 not release the allocated memory you can just call the `tiledCanvas.clearAll()`
 method. This method does not redraw the canvas!
 
+This also clears the current drawings that are in the queue.
+
 ## Moving around
 
 The reason you'd want to use this module is probably because it allows you to
