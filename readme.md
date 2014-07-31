@@ -85,6 +85,15 @@ an empty offscreen canvas, depending on how many operations you have already
 done and thus are in the queue this can become an expensive operation and should
 be avoided.
 
+### Clearing everything
+
+If you want to clear everything there are two ways. If you want to remove all
+the chunkdata you can make the `tiledCanvas.chunks` property an empty object.
+This means however that the next time you draw it has to reallocate the chunks,
+that can be an expensive operation. If you just want to clear the drawings but
+not release the allocated memory you can just call the `tiledCanvas.clearAll()`
+method. This method does not redraw the canvas!
+
 ## Moving around
 
 The reason you'd want to use this module is probably because it allows you to
