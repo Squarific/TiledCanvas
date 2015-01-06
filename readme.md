@@ -36,6 +36,7 @@ The default settings are:
 ### A simple line
 
 First we create a tiledCanvas
+
     var tiledCanvas = new TiledCanvas(document.getElementById("targetcanvas"));
 
 Now you can use all supported context drawing functions by doing:
