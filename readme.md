@@ -75,8 +75,9 @@ manually call the `tiledCanvas.redraw()` method.
 
 ### Note on properties
 
-After an execute the queue is emptied, that also means that all properties are
-reset to the default value!
+After an execute the set properties should be expected to be random as none
+generated chunks have the default values but the other chunks have the ones you set!
+Just set all properties you need before calling execute.
 
 ### Getting properties
 
@@ -105,3 +106,15 @@ desired locatiom and redraw everything on the canvas.
 
 If you resize the canvas dom node you can manually call the tiledCanvas.redraw()
 method.
+
+## Custom background
+
+If you want chunks to have a custom background instead of starting out transparent
+all you have to do is define the tiledCanvas.requestUserChunk to be a function
+that accepts three parameters.
+
+The function should look like:
+
+    tiledCanvas.requestUserChunk = function requestUserChunk (chunkX, chunkY, callback) {
+        callback(image); // Image should be an object that can be painted using canvas2dContext.drawImage(image, 0, 0)
+    }
