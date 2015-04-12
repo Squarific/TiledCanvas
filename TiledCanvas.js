@@ -40,8 +40,11 @@ TiledCanvas.prototype.normalizeDefaults = function normalizeDefaults (target, de
 };
 
 
-TiledCanvas.prototype.redraw = function redraw () {
-    this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+TiledCanvas.prototype.redraw = function redraw (noclear) {
+    if (!noclear) this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+
+    // TODO: Only redraw changed chunks if not moved and size not changed
+
     var startChunkX = Math.floor(this.leftTopX / this.settings.chunkSize),
         endChunkX =  Math.ceil((this.leftTopX + this.canvas.width) / this.settings.chunkSize),
         startChunkY = Math.floor(this.leftTopY / this.settings.chunkSize),
