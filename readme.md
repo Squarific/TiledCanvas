@@ -118,3 +118,10 @@ The function should look like:
     tiledCanvas.requestUserChunk = function requestUserChunk (chunkX, chunkY, callback) {
         callback(image); // Image should be an object that can be painted using canvas2dContext.drawImage(image, 0, 0)
     }
+
+## Methods
+
+tiledCanvas.redraw(noclear);
+
+Redraws the canvas, if noclear is true does not clear the canvas, should only
+be done when stuff gets added and not removed or no transparency is used.
