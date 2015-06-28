@@ -130,8 +130,9 @@ TiledCanvas.prototype.requestChunk = function requestChunk (chunkX, chunkY, call
 
         this.requestUserChunk(chunkX, chunkY, function (image) {
             // Draw the chunk
+            this.chunks[chunkX] = this.chunks[chunkX] || {};
             this.chunks[chunkX][chunkY] =  this.newCtx(this.settings.chunkSize, this.settings.chunkSize, -chunkX * this.settings.chunkSize, -chunkY * this.settings.chunkSize);
-            this.chunks[chunkX][chunkY].drawImage(image, 0, 0);
+            this.chunks[chunkX][chunkY].drawImage(image, chunkX * this.settings.chunkSize, chunkY * this.settings.chunkSize);
 
             // Run all callbacks
             var callbackList = this.requestChunkCallbackList[chunkX][chunkY];
@@ -145,6 +146,14 @@ TiledCanvas.prototype.requestChunk = function requestChunk (chunkX, chunkY, call
             delete this.requestChunkCallbackList[chunkX][chunkY];
         }.bind(this));
     }
+};
+
+TiledCanvas.prototype.copyArray = function copyArray (arr) {
+    var temp = [];
+    for (var k = 0; k < arr.length; k++) {
+        temp[k] = arr[k];
+    }
+    return temp;
 };
 
 TiledCanvas.prototype.executeChunk = function executeChunk (chunkX, chunkY, queue) {
@@ -170,12 +179,13 @@ TiledCanvas.prototype.executeChunk = function executeChunk (chunkX, chunkY, queu
     }
 
     var ctx = this.chunks[chunkX][chunkY];
+    var queue = queue || this.contextQueue;
 
-    for (var queuekey = 0; queuekey < this.contextQueue.length; queuekey++) {
-        if (typeof ctx[this.contextQueue[queuekey][0]] === 'function') {
-            this.executeQueueOnChunk(ctx, this.contextQueue[queuekey]);
+    for (var queuekey = 0; queuekey < queue.length; queuekey++) {
+        if (typeof ctx[queue[queuekey][0]] === 'function') {
+            this.executeQueueOnChunk(ctx, queue[queuekey]);
         } else {
-            ctx[this.contextQueue[queuekey][0]] = this.contextQueue[queuekey][1];
+            ctx[queue[queuekey][0]] = queue[queuekey][1];
         }
     }
 };
