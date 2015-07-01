@@ -63,7 +63,7 @@ TiledCanvas.prototype.redraw = function redraw (noclear) {
 TiledCanvas.prototype.drawChunk = function drawChunk (chunkX, chunkY) {
     if (this.chunks[chunkX] && this.chunks[chunkX][chunkY] && this.chunks[chunkX][chunkY] !== "empty") {
         this.ctx.drawImage(this.chunks[chunkX][chunkY].canvas, ((chunkX * this.settings.chunkSize) - this.leftTopX) * this.zoom, ((chunkY * this.settings.chunkSize) - this.leftTopY) * this.zoom, this.settings.chunkSize * this.zoom, this.settings.chunkSize * this.zoom);
-    } else if(typeof this.requestUserChunk == "function" && this.chunks[chunkX][chunkY] !== "empty") {
+    } else if(typeof this.requestUserChunk == "function" && (!this.chunks[chunkX] || this.chunks[chunkX][chunkY] !== "empty")) {
         this.requestChunk(chunkX, chunkY);
     }
 };
