@@ -134,6 +134,7 @@ TiledCanvas.prototype.requestChunk = function requestChunk (chunkX, chunkY, call
             // If the image is falsy and there is no queue then this chunk is transparent
             // for performance reasons empty chunks should not allocate memory
             if (!image) {
+                this.chunks[chunkX] = this.chunks[chunkX] || {};
                 this.chunks[chunkX][chunkY] = "empty";
                 return;
             }
