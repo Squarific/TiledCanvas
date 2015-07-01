@@ -131,31 +131,39 @@ TiledCanvas.prototype.requestChunk = function requestChunk (chunkX, chunkY, call
         this.requestChunkCallbackList[chunkX][chunkY] = [callback];
 
         this.requestUserChunk(chunkX, chunkY, function (image) {
-            // If the image is falsy and there is no queue then this chunk is transparent
-            // for performance reasons empty chunks should not allocate memory
-            if (!image) {
-                this.chunks[chunkX] = this.chunks[chunkX] || {};
-                this.chunks[chunkX][chunkY] = "empty";
-                return;
-            }
-
-            // Draw the chunk
-            this.chunks[chunkX] = this.chunks[chunkX] || {};
-            this.chunks[chunkX][chunkY] =  this.newCtx(this.settings.chunkSize, this.settings.chunkSize, -chunkX * this.settings.chunkSize, -chunkY * this.settings.chunkSize);
-            this.chunks[chunkX][chunkY].drawImage(image, chunkX * this.settings.chunkSize, chunkY * this.settings.chunkSize);
-
-            // Run all callbacks
-            var callbackList = this.requestChunkCallbackList[chunkX][chunkY];
-            for (var k = 0; k < callbackList.length; k++) {
-                callbackList[k]();
-            }
-
-            // Do a full redraw of the tiled canvas
-            this.redraw();
-
-            delete this.requestChunkCallbackList[chunkX][chunkY];
+            // For responsiveness make sure the callback doesnt happen in the same event frame
+            setTimeout(this.setUserChunk.bind(this, chunkX, chunkY, image));
         }.bind(this));
     }
+};
+
+TiledCanvas.prototype.setUserChunk = function setUserChunk (chunkX, chunkY, image) {
+    // Don't set the user chunk twice
+    if (this.chunks[chunkX] && this.chunks[chunkX][chunkY]) return;
+
+    // If the image is falsy and there is no queue then this chunk is transparent
+    // for performance reasons empty chunks should not allocate memory
+    if (!image) {
+        this.chunks[chunkX] = this.chunks[chunkX] || {};
+        this.chunks[chunkX][chunkY] = "empty";
+        return;
+    }
+
+    // Draw the chunk
+    this.chunks[chunkX] = this.chunks[chunkX] || {};
+    this.chunks[chunkX][chunkY] =  this.newCtx(this.settings.chunkSize, this.settings.chunkSize, -chunkX * this.settings.chunkSize, -chunkY * this.settings.chunkSize);
+    this.chunks[chunkX][chunkY].drawImage(image, chunkX * this.settings.chunkSize, chunkY * this.settings.chunkSize);
+
+    // Run all callbacks
+    var callbackList = this.requestChunkCallbackList[chunkX][chunkY];
+    for (var k = 0; k < callbackList.length; k++) {
+        callbackList[k]();
+    }
+
+    // Do a full redraw of the tiled canvas
+    this.redraw();
+
+    delete this.requestChunkCallbackList[chunkX][chunkY];
 };
 
 TiledCanvas.prototype.copyArray = function copyArray (arr) {
