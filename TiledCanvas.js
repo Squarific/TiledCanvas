@@ -119,16 +119,21 @@ TiledCanvas.prototype.clearChunk = function clearChunk (chunkX, chunkY) {
 TiledCanvas.prototype.requestChunk = function requestChunk (chunkX, chunkY, callback) {
     // Request a chunk and redraw once we got it
     if (typeof this.requestUserChunk !== "function") return;
-    callback = callback || function () {};
     this.requestChunkCallbackList = this.requestChunkCallbackList || {};
 
     if (this.requestChunkCallbackList[chunkX] && this.requestChunkCallbackList[chunkX][chunkY]) {
+        if (!callback) return;
         // This chunk has already been requested, add to the callback list
         this.requestChunkCallbackList[chunkX][chunkY].push(callback);
     } else {
-        // Create a callback list for this chunk
         this.requestChunkCallbackList[chunkX] = this.requestChunkCallbackList[chunkX] || {};
-        this.requestChunkCallbackList[chunkX][chunkY] = [callback];
+
+        if (callback) {
+            // Create a callback list for this chunk
+            this.requestChunkCallbackList[chunkX][chunkY] = [callback];
+        } else {
+            this.requestChunkCallbackList[chunkX][chunkY] = [];
+        }
 
         this.requestUserChunk(chunkX, chunkY, function (image) {
             // For responsiveness make sure the callback doesnt happen in the same event frame
@@ -143,7 +148,7 @@ TiledCanvas.prototype.setUserChunk = function setUserChunk (chunkX, chunkY, imag
 
     // If the image is falsy and there is no queue then this chunk is transparent
     // for performance reasons empty chunks should not allocate memory
-    if (!image) {
+    if (!image && (!this.requestChunkCallbackList[chunkX] || this.requestChunkCallbackList[chunkX][chunkY].lenth == 0)) {
         this.chunks[chunkX] = this.chunks[chunkX] || {};
         this.chunks[chunkX][chunkY] = "empty";
         return;
