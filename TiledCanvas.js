@@ -157,7 +157,8 @@ TiledCanvas.prototype.setUserChunk = function setUserChunk (chunkX, chunkY, imag
     // Draw the chunk
     this.chunks[chunkX] = this.chunks[chunkX] || {};
     this.chunks[chunkX][chunkY] =  this.newCtx(this.settings.chunkSize, this.settings.chunkSize, -chunkX * this.settings.chunkSize, -chunkY * this.settings.chunkSize);
-    this.chunks[chunkX][chunkY].drawImage(image, chunkX * this.settings.chunkSize, chunkY * this.settings.chunkSize);
+
+    if (image) this.chunks[chunkX][chunkY].drawImage(image, chunkX * this.settings.chunkSize, chunkY * this.settings.chunkSize);
 
     // Run all callbacks
     var callbackList = this.requestChunkCallbackList[chunkX][chunkY];
