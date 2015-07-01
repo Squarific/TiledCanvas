@@ -123,6 +123,8 @@ The function should look like:
         callback(image); // Image should be an object that can be painted using canvas2dContext.drawImage(image, 0, 0)
     }
 
+If image is falsy then the chunk is assumed transparent.
+
 ## Methods
 
 tiledCanvas.redraw(noclear);

@@ -8,6 +8,7 @@ function TiledCanvas (canvas, settings) {
 
     this.affecting = [[0, 0], [0, 0]];
     this.chunks = {};
+    // this.chunks[chunkX][chunkY] is a context or 'empty'
 
     this.settings = this.normalizeDefaults(settings, this.defaultSettings);
     this.contextQueue = [];
@@ -60,9 +61,9 @@ TiledCanvas.prototype.redraw = function redraw (noclear) {
 };
 
 TiledCanvas.prototype.drawChunk = function drawChunk (chunkX, chunkY) {
-    if (this.chunks[chunkX] && this.chunks[chunkX][chunkY]) {
+    if (this.chunks[chunkX] && this.chunks[chunkX][chunkY] && this.chunks[chunkX][chunkY] !== "empty") {
         this.ctx.drawImage(this.chunks[chunkX][chunkY].canvas, ((chunkX * this.settings.chunkSize) - this.leftTopX) * this.zoom, ((chunkY * this.settings.chunkSize) - this.leftTopY) * this.zoom, this.settings.chunkSize * this.zoom, this.settings.chunkSize * this.zoom);
-    } else if(typeof this.requestUserChunk == "function") {
+    } else if(typeof this.requestUserChunk == "function" && this.chunks[chunkX][chunkY] !== "empty") {
         this.requestChunk(chunkX, chunkY);
     }
 };
@@ -111,6 +112,7 @@ TiledCanvas.prototype.clearChunkRow = function clearChunkRow (chunkX) {
 };
 
 TiledCanvas.prototype.clearChunk = function clearChunk (chunkX, chunkY) {
+    if (this.chunks[chunkX][chunkY] == "empty") return;
 	this.chunks[chunkX][chunkY].clearRect(chunkX * this.settings.chunkSize, chunkY * this.settings.chunkSize, this.chunks[chunkX][chunkY].canvas.width, this.chunks[chunkX][chunkY].canvas.height);
 };
 
@@ -129,6 +131,13 @@ TiledCanvas.prototype.requestChunk = function requestChunk (chunkX, chunkY, call
         this.requestChunkCallbackList[chunkX][chunkY] = [callback];
 
         this.requestUserChunk(chunkX, chunkY, function (image) {
+            // If the image is falsy and there is no queue then this chunk is transparent
+            // for performance reasons empty chunks should not allocate memory
+            if (!image) {
+                this.chunks[chunkX][chunkY] = "empty";
+                return;
+            }
+
             // Draw the chunk
             this.chunks[chunkX] = this.chunks[chunkX] || {};
             this.chunks[chunkX][chunkY] =  this.newCtx(this.settings.chunkSize, this.settings.chunkSize, -chunkX * this.settings.chunkSize, -chunkY * this.settings.chunkSize);
@@ -160,15 +169,14 @@ TiledCanvas.prototype.executeChunk = function executeChunk (chunkX, chunkY, queu
     // Executes the current queue on a chunk
     // If queue is set execute that queue instead
     this.chunks[chunkX] = this.chunks[chunkX] || [];
-    this.chunks[chunkX][chunkY] = this.chunks[chunkX][chunkY];
  
-    if (!this.chunks[chunkX][chunkY]) {
+    if (!this.chunks[chunkX][chunkY] || this.chunks[chunkX][chunkY] == "empty") {
         // This chunk has never been painted to before
         // We first have to ask what this chunk looks like
         // Remember the Queue untill we got the chunk
         // if we already remembered a queue then add this queue to it
         // Only do this when we actually want to use userdefined chunks
-        if (typeof this.requestUserChunk == "function") {
+        if (typeof this.requestUserChunk == "function" && this.chunks[chunkX][chunkY] !== "empty") {
             this.requestChunk(chunkX, chunkY, function (queue) {
                 this.executeChunk(chunkX, chunkY, queue);
             }.bind(this, this.copyArray(queue || this.contextQueue)))
