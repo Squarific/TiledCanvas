@@ -123,7 +123,9 @@ The function should look like:
         callback(image); // Image should be an object that can be painted using canvas2dContext.drawImage(image, 0, 0)
     }
 
-If image is falsy then the chunk is assumed transparent.
+If image is falsy then the chunk is assumed transparent. You can put an image
+in the tiledCanvas.loadingImage property. It will be used for chunks that are
+loading.
 
 ## Methods
 

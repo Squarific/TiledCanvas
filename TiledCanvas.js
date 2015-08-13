@@ -66,6 +66,9 @@ TiledCanvas.prototype.drawChunk = function drawChunk (chunkX, chunkY) {
         this.ctx.drawImage(this.chunks[chunkX][chunkY].canvas, ((chunkX * this.settings.chunkSize) - this.leftTopX) * this.zoom, ((chunkY * this.settings.chunkSize) - this.leftTopY) * this.zoom, this.settings.chunkSize * this.zoom, this.settings.chunkSize * this.zoom);
     } else if(typeof this.requestUserChunk == "function") {
         this.requestChunk(chunkX, chunkY);
+        if (this.loadingImage) {
+            this.ctx.drawImage(this.loadingImage, ((chunkX * this.settings.chunkSize) - this.leftTopX) * this.zoom, ((chunkY * this.settings.chunkSize) - this.leftTopY) * this.zoom, this.settings.chunkSize * this.zoom, this.settings.chunkSize * this.zoom);
+        }
     }
 };
 
@@ -122,7 +125,7 @@ TiledCanvas.prototype.requestChunk = function requestChunk (chunkX, chunkY, call
     if (typeof this.requestUserChunk !== "function") return;
     this.requestChunkCallbackList = this.requestChunkCallbackList || {};
 
-    if (this.requestChunkCallbackList[chunkX] && this.requestChunkCallbackList[chunkX][chunkY]) {
+    if (this.requestChunkCallbackList[chunkX] && this.requestChunkCallbackList[chunkX][chunkY]) {f
         if (!callback) return;
         // This chunk has already been requested, add to the callback list
         this.requestChunkCallbackList[chunkX][chunkY].push(callback);
