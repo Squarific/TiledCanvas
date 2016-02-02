@@ -49,11 +49,11 @@ TiledCanvas.prototype.normalizeDefaults = function normalizeDefaults (target, de
 // will actually be executed
 TiledCanvas.prototype.redrawOnce = function redrawOnce () {
     if (!this._redrawTimeout)
-        this._redrawTimeout = setTimeout(this.redraw.bind(this));
+        this._redrawTimeout = requestAnimationFrame(this.redraw.bind(this, false));
 };
 
 TiledCanvas.prototype.redraw = function redraw (noclear) {
-	clearTimeout(this._redrawTimeout);
+	cancelAnimationFrame(this._redrawTimeout);
 	delete this._redrawTimeout;
 
     if (!noclear) this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
