@@ -44,8 +44,20 @@ TiledCanvas.prototype.normalizeDefaults = function normalizeDefaults (target, de
 	return normalized;
 };
 
+// Function that schedules one redraw, if you call this twice
+// within the same frame, or twice before a redraw is done, only one redraw
+// will actually be executed
+TiledCanvas.prototype.redrawOnce = function redrawOnce () {
+    if (!this._redrawTimeout)
+        this._redrawTimeout = setTimeout(this.redraw);
+};
 
 TiledCanvas.prototype.redraw = function redraw (noclear) {
+	if (this._redrawTimeout) {
+		clearTimeout(this._redrawTimeout);
+		delete this._redrawTimeout;
+	}
+
     if (!noclear) this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
     var startChunkX = Math.floor(this.leftTopX / this.settings.chunkSize),
@@ -75,22 +87,22 @@ TiledCanvas.prototype.drawChunk = function drawChunk (chunkX, chunkY) {
 TiledCanvas.prototype.goto = function goto (x, y) {
     this.leftTopX = x;
     this.leftTopY = y;
-    this.redraw();
+    this.redrawOnce();
 };
 
 TiledCanvas.prototype.relativeZoom = function relativeZoom (zoom) {
     this.zoom *= zoom;
-    this.redraw();
+    this.redrawOnce();
 };
 
 TiledCanvas.prototype.absoluteZoom = function absoluteZoom (zoom) {
     this.zoom = zoom;
-    this.redraw();
+    this.redrawOnce();
 };
 
 TiledCanvas.prototype.execute = function execute () {
     this.executeNoRedraw();
-    this.redraw();
+    this.redrawOnce();
 };
 
 TiledCanvas.prototype.executeNoRedraw = function executeNoRedraw () {
@@ -125,7 +137,7 @@ TiledCanvas.prototype.requestChunk = function requestChunk (chunkX, chunkY, call
     if (typeof this.requestUserChunk !== "function") return;
     this.requestChunkCallbackList = this.requestChunkCallbackList || {};
 
-    if (this.requestChunkCallbackList[chunkX] && this.requestChunkCallbackList[chunkX][chunkY]) {f
+    if (this.requestChunkCallbackList[chunkX] && this.requestChunkCallbackList[chunkX][chunkY]) {
         if (!callback) return;
         // This chunk has already been requested, add to the callback list
         this.requestChunkCallbackList[chunkX][chunkY].push(callback);
@@ -171,7 +183,7 @@ TiledCanvas.prototype.setUserChunk = function setUserChunk (chunkX, chunkY, imag
     }
 
     // Do a full redraw of the tiled canvas
-    this.redraw();
+    this.redrawOnce();
 
     delete this.requestChunkCallbackList[chunkX][chunkY];
 };
