@@ -114,20 +114,8 @@ TiledCanvas.prototype.executeNoRedraw = function executeNoRedraw () {
 
 TiledCanvas.prototype.clearAll = function clearAll () {
     this.contextQueue = [];
-    for (var chunkX in this.chunks) {
-        this.clearChunkRow(chunkX);
-    }
-};
-
-TiledCanvas.prototype.clearChunkRow = function clearChunkRow (chunkX) {
-    for (var chunkY in this.chunks[chunkX]) {
-        this.clearChunk(chunkX, chunkY);
-    }
-};
-
-TiledCanvas.prototype.clearChunk = function clearChunk (chunkX, chunkY) {
-    if (this.chunks[chunkX][chunkY] == "empty") return;
-	this.chunks[chunkX][chunkY].clearRect(chunkX * this.settings.chunkSize, chunkY * this.settings.chunkSize, this.chunks[chunkX][chunkY].canvas.width, this.chunks[chunkX][chunkY].canvas.height);
+    this.requestChunkCallbackList = {};
+    this.chunks = {};
 };
 
 TiledCanvas.prototype.requestChunk = function requestChunk (chunkX, chunkY, callback) {
@@ -151,7 +139,7 @@ TiledCanvas.prototype.requestChunk = function requestChunk (chunkX, chunkY, call
 
         this.requestUserChunk(chunkX, chunkY, function (image) {
             // For responsiveness make sure the callback doesnt happen in the same event frame
-            setTimeout(this.setUserChunk.bind(this, chunkX, chunkY, image));
+            this.setUserChunk(chunkX, chunkY, image);
         }.bind(this));
     }
 };
@@ -162,9 +150,10 @@ TiledCanvas.prototype.setUserChunk = function setUserChunk (chunkX, chunkY, imag
 
     // If the image is falsy and there is no queue then this chunk is transparent
     // for performance reasons empty chunks should not allocate memory
-    if (!image && (!this.requestChunkCallbackList[chunkX] || this.requestChunkCallbackList[chunkX][chunkY].lenth == 0)) {
+    if (!image && (!this.requestChunkCallbackList[chunkX] || this.requestChunkCallbackList[chunkX][chunkY].length == 0)) {
         this.chunks[chunkX] = this.chunks[chunkX] || {};
         this.chunks[chunkX][chunkY] = "empty";
+        delete this.requestChunkCallbackList[chunkX][chunkY];
         return;
     }
 
