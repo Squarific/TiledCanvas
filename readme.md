@@ -87,7 +87,7 @@ Just set all properties you need before calling execute.
 ### Getting properties
 
 If you get a property from the canvas it needs to run trough the whole queue on
-an empty offscreen canvas, depending on how many operations you have already
+an empty offscreen canvas. Depending on how many operations you have already
 done and thus are in the queue this can become an expensive operation and should
 be avoided.
 
