@@ -16,6 +16,8 @@ function TiledCanvas (canvas, settings) {
     this.lastClear = Date.now();
 }
 
+TiledCanvas.prototype.MIN_INACTIVE_UNLOAD_TIME = 10 * 1000;
+
 TiledCanvas.prototype.defaultSettings = {
     chunkSize: 256,                      // The size of the chunks in pixels
     fadeTime: 500,                       // Fade time for the loading animation
@@ -67,7 +69,7 @@ TiledCanvas.prototype.redraw = function redraw (noclear) {
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
         this.ctx.restore();
     }
-
+	
     var startChunkX = Math.floor(this.leftTopX / this.settings.chunkSize),
         endChunkX   = Math.ceil((this.leftTopX + this.canvas.width / this.zoom) / this.settings.chunkSize),
         startChunkY = Math.floor(this.leftTopY / this.settings.chunkSize),
@@ -83,6 +85,8 @@ TiledCanvas.prototype.redraw = function redraw (noclear) {
 TiledCanvas.prototype.drawChunk = function drawChunk (chunkX, chunkY) {
     if (this.chunks[chunkX] && this.chunks[chunkX][chunkY]) {
         if (this.chunks[chunkX][chunkY] == "empty") return;
+	
+	this.chunks[chunkX][chunkY].lastDrawn = Date.now();
 
         this.ctx.drawImage(this.chunks[chunkX][chunkY].canvas, ((chunkX * this.settings.chunkSize) - this.leftTopX) * this.zoom, ((chunkY * this.settings.chunkSize) - this.leftTopY) * this.zoom, this.settings.chunkSize * this.zoom, this.settings.chunkSize * this.zoom);
 
@@ -187,11 +191,36 @@ TiledCanvas.prototype.requestChunk = function requestChunk (chunkX, chunkY, call
 };
 
 /*
-	Tries to remove as many chunks as possible that have not been used for more than 10 seconds
+	Tries to remove as many chunks as possible that have not been used for more than MIN_INACTIVE_UNLOAD_TIME
 	Chunks that have been drawn on will never be removed
+	Only removes chunk if we are over the limit
 */
 TiledCanvas.prototype.garbageCollect = function garbageCollect () {
+	if (this.chunkCount() > this.settings.maxLoadedChunks) {
+		for (var x in this.chunks) {
+			for (var y in this.chunks[x]) {
+				if (this.chunks[x][y] != "empty" &&
+				    this.chunks[x][y] && 
+				    Date.now() - this.chunks[x][y].lastDrawn > this.MIN_INACTIVE_UNLOAD_TIME) {
+					delete this.chunks[x][y];
+				}
+			}
+		}
+	}
+};
+
+/*
+	Returns the amount of loaded, non-empty chunks
+*/
+TiledCanvas.prototype.chunkCount = function chunkCount () {
+	var count = 0;
 	
+	for (var x in this.chunks)
+		for (var y in this.chunks[x])
+			if (this.chunks[x][y] != "empty" && this.chunks[x][y])
+				count++;
+	
+	return count;
 };
 
 TiledCanvas.prototype.setUserChunk = function setUserChunk (chunkX, chunkY, image) {
