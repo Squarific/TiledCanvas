@@ -7,9 +7,9 @@ efficient.
 
 # Example
 
-This module is used in Squarific Drawtogheter.
-Demo: http://www.squarific.com/drawtogheter
-Source: https://github.com/Squarific/DrawTogheter
+This module is used in Paint.js and Anondraw    
+Demo: http://www.anondraw.com    
+Source: https://github.com/Squarific/Anondraw
 
 # How to use
 
