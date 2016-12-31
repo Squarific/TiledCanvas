@@ -17,8 +17,9 @@ function TiledCanvas (canvas, settings) {
 }
 
 TiledCanvas.prototype.defaultSettings = {
-    chunkSize: 256,
-    fadeTime: 500
+    chunkSize: 256,                      // The size of the chunks in pixels
+    fadeTime: 500,                       // Fade time for the loading animation
+    maxLoadedChunks: 100                 // We'll try never loading more than this amount of chunks if possible
 };
 
 TiledCanvas.prototype.cloneObject = function (obj) {
@@ -181,6 +182,16 @@ TiledCanvas.prototype.requestChunk = function requestChunk (chunkX, chunkY, call
             this.setUserChunk(chunkX, chunkY, image);
         }.bind(this));
     }
+
+    this.garbageCollect();
+};
+
+/*
+	Tries to remove as many chunks as possible that have not been used for more than 10 seconds
+	Chunks that have been drawn on will never be removed
+*/
+TiledCanvas.prototype.garbageCollect = function garbageCollect () {
+	
 };
 
 TiledCanvas.prototype.setUserChunk = function setUserChunk (chunkX, chunkY, image) {
@@ -258,6 +269,7 @@ TiledCanvas.prototype.executeChunk = function executeChunk (chunkX, chunkY, queu
 
 TiledCanvas.prototype.executeQueueOnChunk = function executeQueueOnChunk (ctx, args) {
     ctx[args[0]].apply(ctx, Array.prototype.slice.call(args, 1));
+    ctx.hasBeenDrawnOn = true;
 };
 
 TiledCanvas.prototype.drawingRegion = function (startX, startY, endX, endY, border) {
