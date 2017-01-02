@@ -17,7 +17,7 @@ function TiledCanvas (canvas, settings) {
 }
 
 TiledCanvas.prototype.defaultSettings = {
-    chunkSize: 256,                      // The size of the chunks in pixels
+    chunkSize: 1024,                      // The size of the chunks in pixels
     fadeTime: 500,                       // Fade time for the loading animation
     maxLoadedChunks: 100                 // We'll try never loading more than this amount of chunks if possible
 };
