@@ -202,7 +202,7 @@ TiledCanvas.prototype.garbageCollect = function garbageCollect () {
 	if (this.chunkCount() > this.settings.maxLoadedChunks) {
 		for (var x in this.chunks) {
 			for (var y in this.chunks[x]) {
-				if (this.beforeUnloadChunk(x, y) && this.canBeUnloaded(x, y)) {
+				if (this.canBeUnloaded(x, y) && this.beforeUnloadChunk(x, y)) {
 					delete this.chunks[x][y];
 				}
 			}
