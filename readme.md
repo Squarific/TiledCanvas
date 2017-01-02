@@ -28,7 +28,7 @@ drawingregion and manually execute the drawings.
 The default settings are:
 
     {
-        chunkSize: 256,        //The amount of pixels each chunk is wide and high
+        chunkSize: 1024,       //The amount of pixels each chunk is wide and high
         fadeTime: 500          //The time images fade when loading from external source
         maxLoadedChunks: 100   // We'll try never loading more than this amount of chunks if possible
     }
