@@ -28,8 +28,9 @@ drawingregion and manually execute the drawings.
 The default settings are:
 
     {
-        chunkSize: 256, //The amount of pixels each chunk is wide and high
-        fadeTime: 500   //The time images fade when loading from external source
+        chunkSize: 256,        //The amount of pixels each chunk is wide and high
+        fadeTime: 500          //The time images fade when loading from external source
+        maxLoadedChunks: 100   // We'll try never loading more than this amount of chunks if possible
     }
 
 ## Example
@@ -138,3 +139,8 @@ be done when stuff gets added and not removed or no transparency is used.
 tiledCanvas.execute(callback); tiledCanvas.executeNoRedraw(callback);
 
 Needs to be called after you are done drawing. The callback will be called once the whole queue is done.
+
+## Disable unloading certain chunks
+
+Overwrite paint.beforeUnloadChunk = function (cx, cy) and return false if a chunk should not be unloaded.
+You can use this if you have multiple tiledCanvas over eachother and they have to have the same chunks loaded or if certain chunks have to always be loaded.
