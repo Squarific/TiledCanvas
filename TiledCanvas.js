@@ -190,6 +190,9 @@ TiledCanvas.prototype.requestChunk = function requestChunk (chunkX, chunkY, call
     this.garbageCollect();
 };
 
+// This function can be overridden to make certain chunks not unload
+TiledCanvas.prototype.beforeUnloadChunk = function beforeUnloadChunk () { return true; }
+
 /*
 	Tries to remove as many chunks as possible that have not been used for more than MIN_INACTIVE_UNLOAD_TIME
 	Chunks that have been drawn on will never be removed
@@ -199,9 +202,7 @@ TiledCanvas.prototype.garbageCollect = function garbageCollect () {
 	if (this.chunkCount() > this.settings.maxLoadedChunks) {
 		for (var x in this.chunks) {
 			for (var y in this.chunks[x]) {
-				if (this.chunks[x][y] != "empty" &&
-				    this.chunks[x][y] && 
-				    Date.now() - this.chunks[x][y].lastDrawn > this.MIN_INACTIVE_UNLOAD_TIME) {
+				if (this.beforeUnloadChunk(x, y) && this.canBeUnloaded(x, y)) {
 					delete this.chunks[x][y];
 				}
 			}
@@ -221,6 +222,12 @@ TiledCanvas.prototype.chunkCount = function chunkCount () {
 				count++;
 	
 	return count;
+};
+
+TiledCanvas.prototype.canBeUnloaded = function canBeUnloaded (cx, cy) {
+	return this.chunks[cx][cy] != "empty" &&
+	       this.chunks[cx][cy] &&
+	       Date.now() - this.chunks[cx][cy].lastDrawn > this.MIN_INACTIVE_UNLOAD_TIME
 };
 
 TiledCanvas.prototype.setUserChunk = function setUserChunk (chunkX, chunkY, image) {
