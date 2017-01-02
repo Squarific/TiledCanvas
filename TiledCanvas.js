@@ -225,7 +225,7 @@ TiledCanvas.prototype.chunkCount = function chunkCount () {
 };
 
 TiledCanvas.prototype.canBeUnloaded = function canBeUnloaded (cx, cy) {
-	return Date.now() - this.chunks[cx][cy].lastDrawn > this.MIN_INACTIVE_UNLOAD_TIME
+	return Date.now() - this.chunks[cx][cy].lastDrawn > this.MIN_INACTIVE_UNLOAD_TIME && !this.chunks[cx][cy].hasBeenDrawnOn;
 };
 
 TiledCanvas.prototype.setUserChunk = function setUserChunk (chunkX, chunkY, image) {
