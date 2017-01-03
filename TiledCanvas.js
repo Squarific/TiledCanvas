@@ -9,6 +9,11 @@ function TiledCanvas (canvas, settings) {
     this.affecting = [[0, 0], [0, 0]];
     this.chunks = {};
     // this.chunks[chunkX][chunkY] is a context or 'empty'
+	
+    this.zoomedChunks = {};
+    // this.zoomedChunks[zoom][chunkX][chunkY] is a context or 'empty'
+	// If zoom is 2, the chunks are a combination of 2 base chunks
+	// Zoom should only be used in powers of two: 2, 4, 8, 16, 32, ...
 
     this.settings = this.normalizeDefaults(settings, this.defaultSettings);
     this.contextQueue = [];
@@ -19,7 +24,7 @@ function TiledCanvas (canvas, settings) {
 TiledCanvas.prototype.MIN_INACTIVE_UNLOAD_TIME = 10 * 1000;
 
 TiledCanvas.prototype.defaultSettings = {
-    chunkSize: 1024,                      // The size of the chunks in pixels
+    chunkSize: 1024,                     // The size of the chunks in pixels
     fadeTime: 500,                       // Fade time for the loading animation
     maxLoadedChunks: 100                 // We'll try never loading more than this amount of chunks if possible
 };
