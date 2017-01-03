@@ -121,13 +121,15 @@ that accepts three parameters.
 
 The function should look like:
 
-    tiledCanvas.requestUserChunk = function requestUserChunk (chunkX, chunkY, callback) {
+    tiledCanvas.requestUserChunk = function requestUserChunk (zoom, chunkX, chunkY, callback) {
         callback(image); // Image should be an object that can be painted using canvas2dContext.drawImage(image, 0, 0)
     }
 
 If image is falsy then the chunk is assumed transparent. You can put an image
 in the tiledCanvas.loadingImage property. It will be used for chunks that are
 loading.
+
+The zoom is always a power of two: 1, 2, 4, 8, ... when it is 2, it is two times zoomed out, and chunk 0, 0 should contain the chunks of the previous zoom level at coords (0,0); (0,1); (1,0); (1,1)
 
 ## Methods
 
