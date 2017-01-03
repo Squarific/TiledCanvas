@@ -164,31 +164,34 @@ TiledCanvas.prototype.clearAll = function clearAll () {
     this.lastClear = Date.now();
 };
 
-TiledCanvas.prototype.requestChunk = function requestChunk (chunkX, chunkY, callback) {
+TiledCanvas.prototype.requestChunk = function requestChunk (zoom, chunkX, chunkY, callback) {
     // Request a chunk and redraw once we got it
     if (typeof this.requestUserChunk !== "function") return;
     this.requestChunkCallbackList = this.requestChunkCallbackList || {};
 
-    if (this.requestChunkCallbackList[chunkX] && this.requestChunkCallbackList[chunkX][chunkY]) {
+    if (this.requestChunkCallbackList[zoom] &&
+        this.requestChunkCallbackList[zoom][chunkX] &&
+        this.requestChunkCallbackList[zoom][chunkX][chunkY]) {
         if (!callback) return;
         // This chunk has already been requested, add to the callback list
-        this.requestChunkCallbackList[chunkX][chunkY].push(callback);
+        this.requestChunkCallbackList[zoom][chunkX][chunkY].push(callback);
     } else {
-        this.requestChunkCallbackList[chunkX] = this.requestChunkCallbackList[chunkX] || {};
+	this.requestChunkCallbackList[zoom] = this.requestChunkCallbackList[zoom] || {};
+        this.requestChunkCallbackList[zoom][chunkX] = this.requestChunkCallbackList[zoom][chunkX] || {};
 
         if (callback) {
             // Create a callback list for this chunk
-            this.requestChunkCallbackList[chunkX][chunkY] = [callback];
+            this.requestChunkCallbackList[zoom][chunkX][chunkY] = [callback];
         } else {
-            this.requestChunkCallbackList[chunkX][chunkY] = [];
+            this.requestChunkCallbackList[zoom][chunkX][chunkY] = [];
         }
 
         var startTime = Date.now();
-        this.requestUserChunk(chunkX, chunkY, function (image) {
+        this.requestUserChunk(zoom, chunkX, chunkY, function (image) {
             // If the request started before we cleared, ignore this
             if (this.lastClear > startTime) return;
             // For responsiveness make sure the callback doesnt happen in the same event frame
-            this.setUserChunk(chunkX, chunkY, image);
+            this.setUserChunk(zoom, chunkX, chunkY, image);
         }.bind(this));
     }
 
@@ -233,16 +236,16 @@ TiledCanvas.prototype.canBeUnloaded = function canBeUnloaded (cx, cy) {
 	return Date.now() - this.chunks[cx][cy].lastDrawn > this.MIN_INACTIVE_UNLOAD_TIME && !this.chunks[cx][cy].hasBeenDrawnOn;
 };
 
-TiledCanvas.prototype.setUserChunk = function setUserChunk (chunkX, chunkY, image) {
+TiledCanvas.prototype.setUserChunk = function setUserChunk (zoom, chunkX, chunkY, image) {
     // Don't set the user chunk twice
     if (this.chunks[chunkX] && this.chunks[chunkX][chunkY]) return;
 
     // If the image is falsy and there is no queue then this chunk is transparent
     // for performance reasons empty chunks should not allocate memory
-    if (!image && (!this.requestChunkCallbackList[chunkX] || this.requestChunkCallbackList[chunkX][chunkY].length == 0)) {
+    if (!image && (!this.requestChunkCallbackList[zoom] || !this.requestChunkCallbackList[zoom][chunkX] || this.requestChunkCallbackList[zoom][chunkX][chunkY].length == 0)) {
         this.chunks[chunkX] = this.chunks[chunkX] || {};
         this.chunks[chunkX][chunkY] = "empty";
-        delete this.requestChunkCallbackList[chunkX][chunkY];
+        delete this.requestChunkCallbackList[zoom][chunkX][chunkY];
         return;
     }
 
@@ -254,7 +257,7 @@ TiledCanvas.prototype.setUserChunk = function setUserChunk (chunkX, chunkY, imag
     if (image) this.chunks[chunkX][chunkY].drawImage(image, chunkX * this.settings.chunkSize, chunkY * this.settings.chunkSize);
 
     // Run all callbacks
-    var callbackList = this.requestChunkCallbackList[chunkX][chunkY];
+    var callbackList = this.requestChunkCallbackList[zoom][chunkX][chunkY];
     for (var k = 0; k < callbackList.length; k++) {
         callbackList[k]();
     }
@@ -262,7 +265,7 @@ TiledCanvas.prototype.setUserChunk = function setUserChunk (chunkX, chunkY, imag
     // Do a full redraw of the tiled canvas
     this.redrawOnce();
 
-    delete this.requestChunkCallbackList[chunkX][chunkY];
+    delete this.requestChunkCallbackList[zoom][chunkX][chunkY];
 };
 
 TiledCanvas.prototype.copyArray = function copyArray (arr) {
