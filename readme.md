@@ -140,6 +140,10 @@ tiledCanvas.execute(callback); tiledCanvas.executeNoRedraw(callback);
 
 Needs to be called after you are done drawing. The callback will be called once the whole queue is done.
 
+tiledCanvas.drawToCanvas(canvas, from, to)
+Where from and to are an array of two elements, ie: [x, y]
+Canvas has to be a canvas.
+
 ## Disable unloading certain chunks
 
 Overwrite paint.beforeUnloadChunk = function (cx, cy) and return false if a chunk should not be unloaded.
