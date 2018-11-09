@@ -47,7 +47,7 @@ Now you can use all supported context drawing functions by doing:
 
 For example
 
-    tiledCanvas.context.begintPath();
+    tiledCanvas.context.beginPath();
     tiledCanvas.context.moveTo(5, 5);
     tiledCanvas.context.lineTo(15, 15);
     tiledCanvas.context.stroke();
@@ -62,7 +62,7 @@ using the tiledCanvas.execute() method.
 
 Our example:
 
-    tiledCanvas.context.begintPath();
+    tiledCanvas.context.beginPath();
     tiledCanvas.context.moveTo(5, 5);
     tiledCanvas.context.lineTo(15, 15);
     tiledCanvas.context.lineWidth = 5;
