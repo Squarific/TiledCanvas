@@ -62,13 +62,14 @@ using the tiledCanvas.execute() method.
 
 Our example:
 
-    tiledCanvas.context.begintPath();
-    tiledCanvas.context.moveTo(5, 5);
-    tiledCanvas.context.lineTo(15, 15);
-    tiledCanvas.context.lineWidth = 5;
-    tiledCanvas.context.stroke();
-    tiledCanvas.drawingRegion(0, 0, 20, 20);
-    tiledCanvas.execute();
+        var tiledCanvas = new TiledCanvas(document.getElementById("sex"));
+        tiledCanvas.context.beginPath();
+        tiledCanvas.context.moveTo(5, 5);
+        tiledCanvas.context.lineTo(15, 15);
+        tiledCanvas.context.lineWidth = 5;
+        tiledCanvas.context.stroke();
+        tiledCanvas.drawingRegion(0, 0, 20, 20);
+        tiledCanvas.execute();
 
 We could have also written
 
